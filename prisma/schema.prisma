@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?  // এখানে '?' যোগ করুন যাতে Google ইউজারদের পাসওয়ার্ড না থাকলেও চলে
+  role      String   @default("CUSTOMER")
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  image       String
+  category    String
+  stock       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  customerEmail String?     // <-- নতুন লাইনটি এখানে যোগ করুন
+  total         Float
+  status        String      @default("PENDING")
+  trackingLink  String?
+  items         OrderItem[]
+  createdAt     DateTime    @default(now())
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  order     Order  @relation(fields: [orderId], references: [id])
+  productId String
+  quantity  Int
+  price     Float
+}
