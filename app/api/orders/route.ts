@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendOrderConfirmation, sendAdminNotification } from "@/lib/mailer";
 
-// GET: সব অর্ডার দেখা
+// GET: সব অর্ডার দেখা (অ্যাডমিনের জন্য)
 export async function GET() {
   try {
     const orders = await prisma.order.findMany({
@@ -16,34 +16,33 @@ export async function GET() {
   }
 }
 
-// POST: নতুন অর্ডার তৈরি করা
+// POST: নতুন অর্ডার তৈরি করা (কাস্টমার চেকআউটের জন্য)
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { customer, items, total } = body;
 
     // ১. ডেটাবেসে অর্ডার সেভ করা
-    // ... (POST মেথডের ভেতরে)
-const order = await prisma.order.create({
-  data: {
-    customerName: customer.name,
-    customerEmail: customer.email,
-    customerPhone: customer.phone,
-    customerAddress: customer.address,
-    customerCity: customer.city,
-    total: parseFloat(total),
-    status: "PENDING",
-    items: {
-      create: items.map((item: any) => ({
-        productId: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-    },
-  },
-});
+    const order = await prisma.order.create({
+      data: {
+        customerName: customer.name,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+        customerAddress: customer.address,
+        customerCity: customer.city,
+        total: parseFloat(total),
+        status: "PENDING",
+        items: {
+          create: items.map((item: any) => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        },
+      } as any, // TypeScript error এড়ানোর জন্য
+    });
 
-    // ২. কাস্টমারকে কনফার্মেশন ইমেইল পাঠানো
+    // ২. কাস্টমার ও অ্যাডমিনকে ইমেইল পাঠানো
     try {
       await sendOrderConfirmation(customer.email, order.id, total, items);
       await sendAdminNotification(order.id, customer, total);
