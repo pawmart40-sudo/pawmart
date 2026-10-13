@@ -38,8 +38,8 @@ export default function Home() {
             <Link href="/shop" className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition">
               Shop Now
             </Link>
-            <Link href="/about" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-orange-500 transition">
-              Learn More
+            <Link href="/shop" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-orange-500 transition">
+             Categories
             </Link>
           </div>
         </div>

@@ -1,10 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -28,7 +28,12 @@ const handler = NextAuth({
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role };
+        return { 
+          id: user.id, 
+          email: user.email, 
+          name: user.name, 
+          role: user.role 
+        };
       },
     }),
   ],
@@ -36,7 +41,10 @@ const handler = NextAuth({
     async signIn({ user, account }) {
       // Google Login-এর জন্য ইউজার ডেটাবেসে সেভ করা
       if (account?.provider === "google") {
-        const existingUser = await prisma.user.findUnique({ where: { email: user.email! } });
+        const existingUser = await prisma.user.findUnique({ 
+          where: { email: user.email! } 
+        });
+        
         if (!existingUser) {
           await prisma.user.create({
             data: { 
@@ -65,12 +73,14 @@ const handler = NextAuth({
     },
   },
   pages: {
-    signIn: "/login", // কাস্টম লগইন পেজ
+    signIn: "/login",
   },
   session: {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

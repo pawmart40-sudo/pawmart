@@ -23,20 +23,25 @@ export async function POST(req: Request) {
     const { customer, items, total } = body;
 
     // ১. ডেটাবেসে অর্ডার সেভ করা
-    const order = await prisma.order.create({
-      data: {
-        customerEmail: customer.email,
-        total: parseFloat(total),
-        status: "PENDING",
-        items: {
-          create: items.map((item: any) => ({
-            productId: item.id,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
-      },
-    });
+    // ... (POST মেথডের ভেতরে)
+const order = await prisma.order.create({
+  data: {
+    customerName: customer.name,
+    customerEmail: customer.email,
+    customerPhone: customer.phone,
+    customerAddress: customer.address,
+    customerCity: customer.city,
+    total: parseFloat(total),
+    status: "PENDING",
+    items: {
+      create: items.map((item: any) => ({
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    },
+  },
+});
 
     // ২. কাস্টমারকে কনফার্মেশন ইমেইল পাঠানো
     try {
